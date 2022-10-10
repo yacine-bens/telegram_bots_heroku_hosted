@@ -229,6 +229,7 @@ function isBotCommand(msg) {
 
 async function takeScreenshot(url, settings) {
     let screenshotBase64 = '';
+    let browser;
 
     const options = {
         args: ['--no-sandbox', '--hide-scrollbars', '--disable-web-security', '--disable-setuid-sandbox'],
@@ -238,7 +239,7 @@ async function takeScreenshot(url, settings) {
     };
 
     try {
-        const browser = await puppeteer.launch(options);
+        browser = await puppeteer.launch(options);
         const page = await browser.newPage();
         await page.setViewport({
             ...settings.resolution,
@@ -266,6 +267,7 @@ async function takeScreenshot(url, settings) {
     }
     catch (err) {
         console.log(err);
+        await browser.close();
         return '';
     }
 }
