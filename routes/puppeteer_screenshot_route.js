@@ -168,7 +168,7 @@ function isBotCommand(msg) {
 
 async function takeScreenshot(url, settings) {
     const options = {
-        args: ['--no-sandbox', '--hide-scrollbars', '--disable-web-security'],
+        args: ['--no-sandbox', '--hide-scrollbars', '--disable-web-security', '--disable-setuid-sandbox'],
         defaultViewport: null,
         ignoreHTTPSErrors: true,
         headless: true
