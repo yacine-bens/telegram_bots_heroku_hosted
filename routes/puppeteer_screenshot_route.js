@@ -181,7 +181,7 @@ async function takeScreenshot(url, settings) {
             ...settings.resolution,
             deviceScaleFactor: 1
         })
-        await page.goto(url, { waitUntil: 'load' });
+        await page.goto(url, { waitUntil: 'networkidle2' });
         const screenshotBase64 = await page.screenshot({
             type: 'png',
             fullPage: settings.fullPage,
