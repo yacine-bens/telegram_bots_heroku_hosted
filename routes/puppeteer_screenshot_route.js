@@ -246,7 +246,7 @@ async function takeScreenshot(url, settings) {
             deviceScaleFactor: 1
         });
         await page.setUserAgent(settings.device);
-        await page.goto(url, { waitUntil: 'networkidle2' });
+        await page.goto(url, { waitUntil: 'networkidle0' });
         if (settings.format === 'image') {
             screenshotBase64 = await page.screenshot({
                 type: 'png',
