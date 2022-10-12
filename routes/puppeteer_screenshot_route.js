@@ -31,10 +31,10 @@ const client = new MongoClient(DB_URI, { useNewUrlParser: true, useUnifiedTopolo
 const settings = {
     device: {
         values: {
-            android: 'Mozilla/5.0 (Linux; Android 13; SM-A205U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.5249.79 Mobile Safari/537.36',
-            windows: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
-            ios: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/106.0.5249.92 Mobile/15E148 Safari/604.1',
-            mac: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36'
+            'android': 'Mozilla/5.0 (Linux; Android 13; SM-A205U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.5249.79 Mobile Safari/537.36',
+            'windows': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
+            'ios': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/106.0.5249.92 Mobile/15E148 Safari/604.1',
+            'mac': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36'
         },
         keyboard: {
             text: 'Choose Device',
@@ -100,6 +100,13 @@ const settings = {
             ]
         }
     }
+};
+
+const defaultSettings = {
+    fullPage: settings.fullPage.values['no'],
+    resolution: settings.resolution.values['800'],
+    device: settings.device.values['windows'],
+    format: settings.format.values['image']
 };
 
 // Receive messages
@@ -168,7 +175,7 @@ router.post(URI, async (req, res) => {
     let screenshot = '';
 
     // User settings
-    const userSettings = await getUserSettings(chatId, db);
+    const userSettings = await getUserSettings(chatId, db, defaultSettings);
 
     try {
         // Check if message is a bot command
@@ -313,26 +320,18 @@ async function isRepeatedUpdate(chat_id, update_id, db) {
     }
 }
 
-async function getUserSettings(chat_id, db) {
-    let userSettings = {
-        fullPage: settings.fullPage.values['no'],
-        resolution: settings.resolution.values['800'],
-        device: settings.device.values['windows'],
-        format: settings.format.values['image']
-    };
+async function getUserSettings(chat_id, db, default_settings) {
+    let userSettings = default_settings;
 
     const userSettingsCollection = db.collection('user_settings');
-    const result = await userSettingsCollection.findOne({ chat_id: chat_id }, { projection: { _id: 0 } });
+    const result = await userSettingsCollection.findOne({ chat_id: chat_id }, { projection: { _id: 0, chat_id: 0 } });
 
     // First time
-    if (!result) {
-        await userSettingsCollection.insertOne({ chat_id: chat_id, ...userSettings });
+    if (result) {
+        userSettings = result;
     }
     else {
-        userSettings.fullPage = result.fullPage;
-        userSettings.resolution = result.resolution;
-        userSettings.device = result.device;
-        userSettings.format = result.format;
+        await userSettingsCollection.insertOne({ chat_id: chat_id, ...userSettings });
     }
 
     return userSettings;
